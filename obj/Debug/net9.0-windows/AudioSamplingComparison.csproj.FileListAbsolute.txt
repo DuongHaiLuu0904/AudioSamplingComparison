@@ -21,3 +21,4 @@ E:\World\TTCS\AudioSamplingComparison\obj\Debug\net9.0-windows\refint\AudioSampl
 E:\World\TTCS\AudioSamplingComparison\obj\Debug\net9.0-windows\AudioSamplingComparison.pdb
 E:\World\TTCS\AudioSamplingComparison\obj\Debug\net9.0-windows\AudioSamplingComparison.genruntimeconfig.cache
 E:\World\TTCS\AudioSamplingComparison\obj\Debug\net9.0-windows\ref\AudioSamplingComparison.dll
+E:\World\TTCS\AudioSamplingComparison\obj\Debug\net9.0-windows\AudioSamplingComparison.sourcelink.json

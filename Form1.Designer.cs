@@ -29,9 +29,12 @@
         private void InitializeComponent()
         {
             this.grpSamplingMethod = new System.Windows.Forms.GroupBox();
+            this.panelMethod = new System.Windows.Forms.Panel();
+            this.radioPCM = new System.Windows.Forms.RadioButton();
+            this.radioADPCM = new System.Windows.Forms.RadioButton();
             this.txtMethodDescription = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.cmbSamplingMethod = new System.Windows.Forms.ComboBox();
+            this.pictureMethod = new System.Windows.Forms.PictureBox();
+            this.lblSelectedMethod = new System.Windows.Forms.Label();
             this.grpSamplingParams = new System.Windows.Forms.GroupBox();
             this.numSamplingInterval = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
@@ -49,6 +52,8 @@
             this.grpResults = new System.Windows.Forms.GroupBox();
             this.lvResults = new System.Windows.Forms.ListView();
             this.grpSamplingMethod.SuspendLayout();
+            this.panelMethod.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureMethod)).BeginInit();
             this.grpSamplingParams.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSamplingInterval)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numChannels)).BeginInit();
@@ -60,9 +65,10 @@
             // 
             // grpSamplingMethod
             // 
+            this.grpSamplingMethod.Controls.Add(this.panelMethod);
             this.grpSamplingMethod.Controls.Add(this.txtMethodDescription);
-            this.grpSamplingMethod.Controls.Add(this.label5);
-            this.grpSamplingMethod.Controls.Add(this.cmbSamplingMethod);
+            this.grpSamplingMethod.Controls.Add(this.pictureMethod);
+            this.grpSamplingMethod.Controls.Add(this.lblSelectedMethod);
             this.grpSamplingMethod.Location = new System.Drawing.Point(12, 12);
             this.grpSamplingMethod.Name = "grpSamplingMethod";
             this.grpSamplingMethod.Size = new System.Drawing.Size(776, 123);
@@ -70,32 +76,73 @@
             this.grpSamplingMethod.TabStop = false;
             this.grpSamplingMethod.Text = "Audio Sampling Method";
             // 
+            // panelMethod
+            // 
+            this.panelMethod.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelMethod.Controls.Add(this.radioPCM);
+            this.panelMethod.Controls.Add(this.radioADPCM);
+            this.panelMethod.Location = new System.Drawing.Point(17, 25);
+            this.panelMethod.Name = "panelMethod";
+            this.panelMethod.Size = new System.Drawing.Size(265, 88);
+            this.panelMethod.TabIndex = 4;
+            // 
+            // radioPCM
+            // 
+            this.radioPCM.AutoSize = true;
+            this.radioPCM.Checked = true;
+            this.radioPCM.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.radioPCM.Location = new System.Drawing.Point(10, 14);
+            this.radioPCM.Name = "radioPCM";
+            this.radioPCM.Size = new System.Drawing.Size(231, 21);
+            this.radioPCM.TabIndex = 0;
+            this.radioPCM.TabStop = true;
+            this.radioPCM.Text = "PCM (Pulse Code Modulation)";
+            this.radioPCM.UseVisualStyleBackColor = true;
+            this.radioPCM.CheckedChanged += new System.EventHandler(this.RadioMethod_CheckedChanged);
+            // 
+            // radioADPCM
+            // 
+            this.radioADPCM.AutoSize = true;
+            this.radioADPCM.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.radioADPCM.Location = new System.Drawing.Point(10, 48);
+            this.radioADPCM.Name = "radioADPCM";
+            this.radioADPCM.Size = new System.Drawing.Size(248, 21);
+            this.radioADPCM.TabIndex = 1;
+            this.radioADPCM.Text = "ADPCM (Adaptive Differential PCM)";
+            this.radioADPCM.UseVisualStyleBackColor = true;
+            this.radioADPCM.CheckedChanged += new System.EventHandler(this.RadioMethod_CheckedChanged);
+            // 
             // txtMethodDescription
             // 
-            this.txtMethodDescription.Location = new System.Drawing.Point(17, 55);
+            this.txtMethodDescription.BackColor = System.Drawing.SystemColors.Info;
+            this.txtMethodDescription.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.txtMethodDescription.Location = new System.Drawing.Point(318, 55);
             this.txtMethodDescription.Multiline = true;
             this.txtMethodDescription.Name = "txtMethodDescription";
             this.txtMethodDescription.ReadOnly = true;
-            this.txtMethodDescription.Size = new System.Drawing.Size(743, 53);
+            this.txtMethodDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtMethodDescription.Size = new System.Drawing.Size(442, 58);
             this.txtMethodDescription.TabIndex = 2;
             // 
-            // label5
+            // pictureMethod
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(17, 29);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(131, 15);
-            this.label5.TabIndex = 1;
-            this.label5.Text = "Select Sampling Method:";
+            this.pictureMethod.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pictureMethod.Location = new System.Drawing.Point(318, 25);
+            this.pictureMethod.Name = "pictureMethod";
+            this.pictureMethod.Size = new System.Drawing.Size(24, 24);
+            this.pictureMethod.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.pictureMethod.TabIndex = 3;
+            this.pictureMethod.TabStop = false;
             // 
-            // cmbSamplingMethod
+            // lblSelectedMethod
             // 
-            this.cmbSamplingMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbSamplingMethod.FormattingEnabled = true;
-            this.cmbSamplingMethod.Location = new System.Drawing.Point(154, 26);
-            this.cmbSamplingMethod.Name = "cmbSamplingMethod";
-            this.cmbSamplingMethod.Size = new System.Drawing.Size(166, 23);
-            this.cmbSamplingMethod.TabIndex = 0;
+            this.lblSelectedMethod.AutoSize = true;
+            this.lblSelectedMethod.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.lblSelectedMethod.Location = new System.Drawing.Point(348, 29);
+            this.lblSelectedMethod.Name = "lblSelectedMethod";
+            this.lblSelectedMethod.Size = new System.Drawing.Size(147, 15);
+            this.lblSelectedMethod.TabIndex = 1;
+            this.lblSelectedMethod.Text = "Selected Method: PCM";
             // 
             // grpSamplingParams
             // 
@@ -326,6 +373,9 @@
             this.Text = "Audio Sampling Methods Comparison";
             this.grpSamplingMethod.ResumeLayout(false);
             this.grpSamplingMethod.PerformLayout();
+            this.panelMethod.ResumeLayout(false);
+            this.panelMethod.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureMethod)).EndInit();
             this.grpSamplingParams.ResumeLayout(false);
             this.grpSamplingParams.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSamplingInterval)).EndInit();
@@ -352,13 +402,16 @@
         private System.Windows.Forms.NumericUpDown numChannels;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown numSamplingInterval;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.ComboBox cmbSamplingMethod;
         private System.Windows.Forms.TextBox txtMethodDescription;
         private System.Windows.Forms.ProgressBar progressBar;
         private System.Windows.Forms.Button btnCapture;
         private System.Windows.Forms.Button btnPlay;
         private System.Windows.Forms.Button btnStop;
         private System.Windows.Forms.ListView lvResults;
+        private System.Windows.Forms.Panel panelMethod;
+        private System.Windows.Forms.RadioButton radioPCM;
+        private System.Windows.Forms.RadioButton radioADPCM;
+        private System.Windows.Forms.Label lblSelectedMethod;
+        private System.Windows.Forms.PictureBox pictureMethod;
     }
 }

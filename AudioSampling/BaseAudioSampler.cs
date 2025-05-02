@@ -34,6 +34,76 @@ namespace AudioSamplingComparison.AudioSampling
         // Base methods
         public abstract Task<AudioData> CaptureAudioAsync(int durationSeconds);
         
+        public virtual AudioData? GetCurrentAudioData()
+        {
+            // Nếu không có dữ liệu thu âm, trả về null
+            if (capturedAudio == null || currentBufferIndex == 0)
+                return null;
+                
+            // Tạo đối tượng AudioData mới với dữ liệu hiện tại
+            var result = new AudioData(
+                SampleRate,
+                BitsPerSample,
+                Channels,
+                currentBufferIndex, // Số lượng buffer đã thu được
+                SamplingIntervalMs,
+                MethodName
+            );
+            
+            // Đặt thời gian ghi âm là thời điểm hiện tại để đảm bảo tính duy nhất
+            result.RecordedTime = DateTime.Now;
+            
+            // Sao chép dữ liệu từ capturedAudio sang audioBuffer
+            for (int i = 0; i < currentBufferIndex; i++)
+            {
+                if (capturedAudio[i] != null)
+                {
+                    result.AudioBuffer[i] = new byte[capturedAudio[i].Length];
+                    Array.Copy(capturedAudio[i], result.AudioBuffer[i], capturedAudio[i].Length);
+                }
+            }
+            
+            // Tính toán thông số
+            result.TotalSamples = CalculateTotalSamples(result.AudioBuffer);
+            result.AverageBitRate = CalculateAverageBitRate(result.AudioBuffer);
+            
+            // Tính toán SNR
+            result.SignalToNoiseRatio = CalculateSignalToNoiseRatio(result);
+            
+            return result;
+        }
+        
+        // Helper method to calculate total samples
+        protected int CalculateTotalSamples(byte[][] buffer)
+        {
+            int totalSamples = 0;
+            foreach (var b in buffer)
+            {
+                if (b != null)
+                {
+                    totalSamples += b.Length / (BitsPerSample / 8);
+                }
+            }
+            return totalSamples;
+        }
+        
+        // Helper method to calculate average bit rate
+        protected double CalculateAverageBitRate(byte[][] buffer)
+        {
+            long totalBytes = 0;
+            foreach (var b in buffer)
+            {
+                if (b != null)
+                {
+                    totalBytes += b.Length;
+                }
+            }
+            
+            // Calculate bit rate in bits per second
+            double durationSeconds = buffer.Length * SamplingIntervalMs / 1000.0;
+            return totalBytes * 8 / durationSeconds;
+        }
+        
         public virtual void PlayAudio(AudioData audioData)
         {
             if (isPlaying)

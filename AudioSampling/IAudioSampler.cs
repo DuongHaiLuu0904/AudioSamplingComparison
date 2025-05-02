@@ -22,6 +22,9 @@ namespace AudioSamplingComparison.AudioSampling
         void StopPlayback();
         void StopCapture();
         
+        // Lấy dữ liệu âm thanh hiện tại khi dừng thu âm
+        AudioData? GetCurrentAudioData();
+        
         // Quality measurement
         double CalculateSignalToNoiseRatio(AudioData audioData);
     }

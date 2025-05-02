@@ -12,6 +12,7 @@ namespace AudioSamplingComparison
     {
         private List<IAudioSampler> samplers;
         private IAudioSampler currentSampler;
+        // Thay đổi kiểu Dictionary để sử dụng string duy nhất làm khóa
         private Dictionary<string, AudioData> capturedAudioData;
         private bool isCapturing = false;
         private bool isPlaying = false;
@@ -20,30 +21,15 @@ namespace AudioSamplingComparison
         {
             InitializeComponent();
             
-            // Initialize sampler instances
+            // Initialize sampler instances with our new PCM and ADPCM samplers
             samplers = new List<IAudioSampler>
             {
-                new WaveInEventSampler(),
-                new WasapiSampler(),
-                // ASIO may not be available on all systems, so we'll add it conditionally
+                new PCMSampler(),
+                new ADPCMSampler()
             };
             
             // Initialize with the first sampler to avoid nullability warning
             currentSampler = samplers[0];
-            
-            try
-            {
-                // Check if ASIO is available
-                string[] driverNames = NAudio.Wave.AsioOut.GetDriverNames();
-                if (driverNames.Length > 0)
-                {
-                    samplers.Add(new AsioSampler());
-                }
-            }
-            catch (Exception)
-            {
-                // ASIO is not available, so we won't add it
-            }
             
             capturedAudioData = new Dictionary<string, AudioData>();
             
@@ -58,18 +44,8 @@ namespace AudioSamplingComparison
         
         private void SetupUI()
         {
-            // Set up the sampler combo box
-            cmbSamplingMethod.Items.Clear();
-            foreach (var sampler in samplers)
-            {
-                cmbSamplingMethod.Items.Add(sampler.MethodName);
-            }
-            
-            if (cmbSamplingMethod.Items.Count > 0)
-            {
-                cmbSamplingMethod.SelectedIndex = 0;
-                currentSampler = samplers[0];
-            }
+            // Set PCM as the default selection
+            radioPCM.Checked = true;
             
             // Set up numeric controls with default values
             numSampleRate.Value = currentSampler.SampleRate;
@@ -77,11 +53,16 @@ namespace AudioSamplingComparison
             numChannels.Value = currentSampler.Channels;
             numSamplingInterval.Value = currentSampler.SamplingIntervalMs;
             
+            // Populate method description
+            txtMethodDescription.Text = currentSampler.MethodDescription;
+            
+            // Set the method icon indicator (optional, can be improved with actual icons)
+            pictureMethod.BackColor = System.Drawing.Color.LightBlue;
+            
             // Disable play button initially
             btnPlay.Enabled = false;
             
             // Register events
-            cmbSamplingMethod.SelectedIndexChanged += CmbSamplingMethod_SelectedIndexChanged;
             btnCapture.Click += BtnCapture_Click;
             btnStop.Click += BtnStop_Click;
             btnPlay.Click += BtnPlay_Click;
@@ -103,26 +84,39 @@ namespace AudioSamplingComparison
             lvResults.ItemSelectionChanged += LvResults_ItemSelectionChanged;
         }
         
-        private void LvResults_ItemSelectionChanged(object? sender, ListViewItemSelectionChangedEventArgs e)
+        private void RadioMethod_CheckedChanged(object? sender, EventArgs e)
         {
-            btnPlay.Enabled = e.IsSelected && e.Item != null && capturedAudioData.ContainsKey(e.Item.Text);
-        }
-        
-        private void CmbSamplingMethod_SelectedIndexChanged(object? sender, EventArgs e)
-        {
-            if (cmbSamplingMethod.SelectedIndex >= 0)
+            if (sender is RadioButton radioButton && radioButton.Checked)
             {
-                currentSampler = samplers[cmbSamplingMethod.SelectedIndex];
+                // Determine which sampler to use based on the selected radio button
+                if (radioButton == radioPCM)
+                {
+                    currentSampler = samplers[0]; // PCM sampler
+                    lblSelectedMethod.Text = "Selected Method: PCM";
+                    pictureMethod.BackColor = System.Drawing.Color.LightBlue;
+                }
+                else if (radioButton == radioADPCM)
+                {
+                    currentSampler = samplers[1]; // ADPCM sampler
+                    lblSelectedMethod.Text = "Selected Method: ADPCM";
+                    pictureMethod.BackColor = System.Drawing.Color.LightGreen;
+                }
+                
+                // Update method description
+                txtMethodDescription.Text = currentSampler.MethodDescription;
                 
                 // Update numeric controls to match the selected sampler
                 numSampleRate.Value = currentSampler.SampleRate;
                 numBitsPerSample.Value = currentSampler.BitsPerSample;
                 numChannels.Value = currentSampler.Channels;
                 numSamplingInterval.Value = currentSampler.SamplingIntervalMs;
-                
-                // Show method description
-                txtMethodDescription.Text = currentSampler.MethodDescription;
             }
+        }
+        
+        private void LvResults_ItemSelectionChanged(object? sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            string? selectedKey = e.Item?.Tag as string;
+            btnPlay.Enabled = e.IsSelected && selectedKey != null && capturedAudioData.ContainsKey(selectedKey);
         }
         
         private async void BtnCapture_Click(object? sender, EventArgs e)
@@ -135,7 +129,8 @@ namespace AudioSamplingComparison
             // Update UI state
             btnCapture.Enabled = false;
             btnStop.Enabled = true;
-            cmbSamplingMethod.Enabled = false;
+            radioPCM.Enabled = false;
+            radioADPCM.Enabled = false;
             
             // Apply current parameters to the sampler
             currentSampler.SampleRate = (int)numSampleRate.Value;
@@ -152,15 +147,11 @@ namespace AudioSamplingComparison
                 // Capture audio for 60 seconds (1 minute)
                 var result = await currentSampler.CaptureAudioAsync(60);
                 
-                // Store captured data
-                if (capturedAudioData.ContainsKey(result.SamplingMethod))
-                {
-                    capturedAudioData[result.SamplingMethod] = result;
-                }
-                else
-                {
-                    capturedAudioData.Add(result.SamplingMethod, result);
-                }
+                // Tạo khóa duy nhất cho kết quả thu âm
+                string uniqueKey = GenerateUniqueKey(result);
+                
+                // Lưu dữ liệu đã thu được
+                capturedAudioData[uniqueKey] = result;
                 
                 // Update results list
                 UpdateResultsList();
@@ -175,7 +166,8 @@ namespace AudioSamplingComparison
                 isCapturing = false;
                 btnCapture.Enabled = true;
                 btnStop.Enabled = false;
-                cmbSamplingMethod.Enabled = true;
+                radioPCM.Enabled = true;
+                radioADPCM.Enabled = true;
                 progressBar.Style = ProgressBarStyle.Blocks;
             }
         }
@@ -184,13 +176,31 @@ namespace AudioSamplingComparison
         {
             if (isCapturing)
             {
+                // Lấy dữ liệu âm thanh hiện tại trước khi dừng thu âm
+                var result = currentSampler.GetCurrentAudioData();
+                
+                // Dừng thu âm
                 currentSampler.StopCapture();
                 isCapturing = false;
+                
+                // Nếu có dữ liệu thu được, thêm vào danh sách kết quả
+                if (result != null)
+                {
+                    // Tạo khóa duy nhất cho kết quả thu âm
+                    string uniqueKey = GenerateUniqueKey(result);
+                    
+                    // Lưu dữ liệu đã thu được
+                    capturedAudioData[uniqueKey] = result;
+                    
+                    // Cập nhật danh sách kết quả
+                    UpdateResultsList();
+                }
                 
                 // Reset UI state
                 btnCapture.Enabled = true;
                 btnStop.Enabled = false;
-                cmbSamplingMethod.Enabled = true;
+                radioPCM.Enabled = true;
+                radioADPCM.Enabled = true;
                 progressBar.Style = ProgressBarStyle.Blocks;
             }
             else if (isPlaying)
@@ -201,6 +211,12 @@ namespace AudioSamplingComparison
                 // Reset UI state
                 btnPlay.Text = "Play";
             }
+        }
+        
+        // Tạo khóa duy nhất kết hợp giữa phương thức thu âm và thời gian ghi
+        private string GenerateUniqueKey(AudioData data)
+        {
+            return $"{data.SamplingMethod} - {data.RecordedTime.ToString("yyyy-MM-dd HH:mm:ss")}";
         }
         
         private void BtnPlay_Click(object? sender, EventArgs e)
@@ -215,9 +231,9 @@ namespace AudioSamplingComparison
             
             if (lvResults.SelectedItems.Count > 0)
             {
-                string method = lvResults.SelectedItems[0].Text;
+                string? selectedKey = lvResults.SelectedItems[0].Tag as string;
                 
-                if (capturedAudioData.ContainsKey(method))
+                if (selectedKey != null && capturedAudioData.ContainsKey(selectedKey))
                 {
                     isPlaying = true;
                     btnPlay.Text = "Stop";
@@ -227,7 +243,7 @@ namespace AudioSamplingComparison
                     {
                         try
                         {
-                            currentSampler.PlayAudio(capturedAudioData[method]);
+                            currentSampler.PlayAudio(capturedAudioData[selectedKey]);
                         }
                         catch (Exception ex)
                         {
@@ -253,8 +269,14 @@ namespace AudioSamplingComparison
             foreach (var entry in capturedAudioData)
             {
                 var audioData = entry.Value;
+                string key = entry.Key;
                 
-                ListViewItem item = new ListViewItem(audioData.SamplingMethod);
+                // Hiển thị tên phương thức và thời gian thu âm
+                string displayName = $"{audioData.SamplingMethod} - {audioData.RecordedTime.ToString("HH:mm:ss")}";
+                
+                ListViewItem item = new ListViewItem(displayName);
+                item.Tag = key; // Lưu khóa duy nhất vào Tag để sử dụng sau này
+                
                 item.SubItems.Add(audioData.SampleRate.ToString());
                 item.SubItems.Add(audioData.BitsPerSample.ToString());
                 item.SubItems.Add(audioData.Channels.ToString());
