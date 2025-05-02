@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AudioSamplingComparison")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+78fdbc5a1076c644ba08a284bec3f8ad77dd2cca")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c555a64e88fe63feafdea0036cc8560ec5cf4a3f")]
 [assembly: System.Reflection.AssemblyProductAttribute("AudioSamplingComparison")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AudioSamplingComparison")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
